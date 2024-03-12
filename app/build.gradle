@@ -13,7 +13,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        manifestPlaceholders = [redirectSchemeName: "Project2", redirectHostName: "auth"]
+        manifestPlaceholders = [redirectSchemeName: "com.example.project2", redirectHostName: "auth"]
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

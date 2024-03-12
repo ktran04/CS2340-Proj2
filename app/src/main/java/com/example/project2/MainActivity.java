@@ -28,9 +28,9 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
 
     public static final String CLIENT_ID = "ef598ecfefbc48da953792cd34909460";
-    public static final String REDIRECT_URI = "Project2://auth";
+    public static final String REDIRECT_URI = "com.example.project2://auth";
 
-    public static final int AUTH_TOKEN_REQUEST_CODE = 1;
+    public static final int AUTH_TOKEN_REQUEST_CODE = 0;
     public static final int AUTH_CODE_REQUEST_CODE = 1;
 
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private AuthorizationRequest getAuthenticationRequest(AuthorizationResponse.Type type) {
         return new AuthorizationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
-                .setShowDialog(false)
+                .setShowDialog(true)
                 .setScopes(new String[] { "user-read-email" }) // <--- Change the scope of your requested token here
                 .setCampaign("your-campaign-token")
                 .build();
