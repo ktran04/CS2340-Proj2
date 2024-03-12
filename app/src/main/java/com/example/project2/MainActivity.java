@@ -111,6 +111,8 @@ public class MainActivity extends AppCompatActivity {
             mAccessCode = response.getCode();
             setTextAsync(mAccessCode, codeTextView);
         }
+        Button profileBtn = (Button) findViewById(R.id.profile_btn);
+        profileBtn.performClick();
     }
 
     /**
