@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-
+        // Create a request to get the user profile
         final Request request = new Request.Builder()
                 .url("https://api.spotify.com/v1/me")
                 .addHeader("Authorization", "Bearer " + mAccessToken)
@@ -137,26 +137,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 try {
-
-                    JSONObject jsonObject = new JSONObject(response.body().string());
-
-
-                    String displayName = jsonObject.getString("display_name");
-                    String email = jsonObject.getString("email");
-                    int followersCount = jsonObject.getJSONObject("followers").getInt("total");
-
-
-                    final String userInfo = "Display Name: " + displayName + "\n" +
-                            "Email: " + email + "\n" +
-                            "Followers Count: " + followersCount;
-
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            profileTextView.setText(userInfo);
-                        }
-                    });
+                    final JSONObject jsonObject = new JSONObject(response.body().string());
+                    setTextAsync(jsonObject.toString(3), profileTextView);
                 } catch (JSONException e) {
                     Log.d("JSON", "Failed to parse data: " + e);
                     Toast.makeText(MainActivity.this, "Failed to parse data, watch Logcat for more details",
