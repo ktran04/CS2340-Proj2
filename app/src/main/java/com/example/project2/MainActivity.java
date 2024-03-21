@@ -4,12 +4,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.project2.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
@@ -18,6 +30,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -39,6 +53,12 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView tokenTextView, codeTextView, profileTextView;
 
+    private static final String TAG = "MainActivity";
+    //private FirebaseFirestore db;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    private DocumentReference mDocRef = db.getInstance().document("sample/sample1"); //alternate collections, docs. do document("collections/inspiration")
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +79,59 @@ public class MainActivity extends AppCompatActivity {
 
         profileBtn.setOnClickListener((v) -> {
             onGetUserProfileClicked();
+        });
+
+        // Initialize the views
+        tokenTextView = (TextView) findViewById(R.id.token_text_view);
+        profileTextView = (TextView) findViewById(R.id.response_text_view);
+
+        Button writeButton = findViewById(R.id.writeButton);
+        Button readButton = findViewById(R.id.readButton);
+        final TextView textViewDatabase = findViewById(R.id.textViewDatabase);
+
+        // Initialize the buttons
+
+
+        // Set the click listeners for the buttons
+
+        writeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText editTextDatabase = findViewById(R.id.editTextDatabase);
+                Map<String, Object> user = new HashMap<>();
+                user.put("username", editTextDatabase.getText().toString());
+                user.put("spotifyToken", mAccessToken);
+
+                db.collection("username")
+                        .add(user)
+                        .addOnSuccessListener(documentReference -> {
+                            Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.w(TAG, "Error adding document", e);
+                        });
+            }
+        });
+
+        //Read Data
+        readButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                db.collection("username")
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                    }
+                                } else {
+                                    Log.w(TAG, "Error getting documents.", task.getException());
+                                }
+                            }
+                        });
+            }
         });
 
     }
