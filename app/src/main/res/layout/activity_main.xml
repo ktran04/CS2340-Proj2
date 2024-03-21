@@ -14,7 +14,7 @@
 
         <TextView
             android:id="@+id/token_text_view"
-            android:layout_width="match_parent"
+            android:layout_width="373dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             tools:text="Token:" />
@@ -24,21 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:text="Request Token" />
-
-        <TextView
-            android:id="@+id/code_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            tools:text="Code:" />
-
-        <Button
-            android:id="@+id/code_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="Request Code" />
+            android:text="Get User Data" />
 
         <TextView
             android:id="@+id/response_text_view"
@@ -51,15 +37,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <Button
-                android:id="@+id/profile_btn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:text="Get User Profile" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/profile_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="8dp"
+            android:layout_weight="1"
+            android:text="Get User Profile" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

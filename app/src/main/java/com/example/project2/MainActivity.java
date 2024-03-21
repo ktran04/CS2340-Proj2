@@ -1,26 +1,15 @@
 package com.example.project2;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.project2.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
@@ -29,9 +18,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -45,17 +31,11 @@ public class MainActivity extends AppCompatActivity {
     public static final String REDIRECT_URI = "com.example.project2://auth";
 
     public static final int AUTH_TOKEN_REQUEST_CODE = 0;
-    public static final int AUTH_CODE_REQUEST_CODE = 1;;
-    private static final String TAG = "MainActivity";
-    //private FirebaseFirestore db;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-    private DocumentReference mDocRef = db.getInstance().document("sample/sample1"); //alternate collections, docs. do document("collections/inspiration")
+    public static final int AUTH_CODE_REQUEST_CODE = 1;
 
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private String mAccessToken, mAccessCode;
     private Call mCall;
-
 
     private TextView tokenTextView, codeTextView, profileTextView;
 
@@ -64,17 +44,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Initialize the views
+        profileTextView = (TextView) findViewById(R.id.response_text_view);
 
+        // Initialize the buttons
         Button tokenBtn = (Button) findViewById(R.id.token_btn);
-        Button codeBtn = (Button) findViewById(R.id.code_btn);
         Button profileBtn = (Button) findViewById(R.id.profile_btn);
+
+        // Set the click listeners for the buttons
 
         tokenBtn.setOnClickListener((v) -> {
             getToken();
-        });
-
-        codeBtn.setOnClickListener((v) -> {
-            getCode();
         });
 
         profileBtn.setOnClickListener((v) -> {
@@ -118,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
         // Check which request code is present (if any)
         if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
             mAccessToken = response.getAccessToken();
-            setTextAsync(mAccessToken, tokenTextView);
 
         } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
             mAccessCode = response.getCode();
@@ -138,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Create a request to get the user profile
+
         final Request request = new Request.Builder()
                 .url("https://api.spotify.com/v1/me")
                 .addHeader("Authorization", "Bearer " + mAccessToken)
@@ -158,8 +137,26 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 try {
-                    final JSONObject jsonObject = new JSONObject(response.body().string());
-                    setTextAsync(jsonObject.toString(3), profileTextView);
+
+                    JSONObject jsonObject = new JSONObject(response.body().string());
+
+
+                    String displayName = jsonObject.getString("display_name");
+                    String email = jsonObject.getString("email");
+                    int followersCount = jsonObject.getJSONObject("followers").getInt("total");
+
+
+                    final String userInfo = "Display Name: " + displayName + "\n" +
+                            "Email: " + email + "\n" +
+                            "Followers Count: " + followersCount;
+
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            profileTextView.setText(userInfo);
+                        }
+                    });
                 } catch (JSONException e) {
                     Log.d("JSON", "Failed to parse data: " + e);
                     Toast.makeText(MainActivity.this, "Failed to parse data, watch Logcat for more details",
