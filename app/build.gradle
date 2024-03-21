@@ -32,6 +32,18 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.firebase:firebase-firestore:16.0.0'
+    implementation 'com.google.firebase:firebase-auth:15.1.0'
+    implementation 'com.google.firebase:firebase-storage:16.0.1'
+
+    implementation 'com.google.android.gms:play-services-auth:15.0.1'
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:23.2.1' //check versions
+    implementation 'com.android.support:design:23.2.1'
+    implementation 'com.android.support:recyclerview-v7:23.2.1' //added from firebase stuff on stackOverflow
+
     implementation libs.auth
     implementation libs.okhttp
 
@@ -47,3 +59,4 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:32.7.4')
     implementation 'com.google.firebase:firebase-analytics'
 }
+apply plugin: 'com.google.gms.google-services'
