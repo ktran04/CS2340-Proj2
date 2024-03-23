@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
         // Check which request code is present (if any)
         if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
             mAccessToken = response.getAccessToken();
-            updateSpotifyTokenInFirestore(mAccessToken);
+            // updateSpotifyTokenInFirestore(mAccessToken);
 
         } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
             mAccessCode = response.getCode();
