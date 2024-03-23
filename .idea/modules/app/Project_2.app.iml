@@ -3,7 +3,11 @@
   <component name="FacetManager">
     <facet external-system-id="GRADLE" type="android-gradle" name="Android-Gradle">
       <configuration>
+<<<<<<< HEAD
         <option name="LAST_SUCCESSFUL_SYNC_AGP_VERSION" value="8.3.0" />
+=======
+        <option name="LAST_SUCCESSFUL_SYNC_AGP_VERSION" />
+>>>>>>> parent of e0883b7 (firebase)
         <option name="LAST_KNOWN_AGP_VERSION" value="8.3.0" />
       </configuration>
     </facet>

@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,11 +15,12 @@ import com.example.project2.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import androidx.annotation.NonNull;
 
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
@@ -46,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int AUTH_TOKEN_REQUEST_CODE = 0;
     public static final int AUTH_CODE_REQUEST_CODE = 1;
+    private static final String TAG = "MainActivity";
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
 
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private String mAccessToken, mAccessCode;
@@ -53,16 +56,15 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView tokenTextView, codeTextView, profileTextView;
 
-    private static final String TAG = "MainActivity";
-    //private FirebaseFirestore db;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-    private DocumentReference mDocRef = db.getInstance().document("sample/sample1"); //alternate collections, docs. do document("collections/inspiration")
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FirebaseApp.initializeApp(this);
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         // Initialize the views
         profileTextView = (TextView) findViewById(R.id.response_text_view);
@@ -85,54 +87,15 @@ public class MainActivity extends AppCompatActivity {
         tokenTextView = (TextView) findViewById(R.id.token_text_view);
         profileTextView = (TextView) findViewById(R.id.response_text_view);
 
-        Button writeButton = findViewById(R.id.writeButton);
-        Button readButton = findViewById(R.id.readButton);
-        final TextView textViewDatabase = findViewById(R.id.textViewDatabase);
+//        Button writeButton = findViewById(R.id.writeButton);
+//        Button readButton = findViewById(R.id.readButton);
+//        final TextView textViewDatabase = findViewById(R.id.textViewDatabase);
 
         // Initialize the buttons
 
 
         // Set the click listeners for the buttons
 
-        writeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText editTextDatabase = findViewById(R.id.editTextDatabase);
-                Map<String, Object> user = new HashMap<>();
-                user.put("username", editTextDatabase.getText().toString());
-                user.put("spotifyToken", mAccessToken);
-
-                db.collection("username")
-                        .add(user)
-                        .addOnSuccessListener(documentReference -> {
-                            Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                        })
-                        .addOnFailureListener(e -> {
-                            Log.w(TAG, "Error adding document", e);
-                        });
-            }
-        });
-
-        //Read Data
-        readButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                db.collection("username")
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(TAG, document.getId() + " => " + document.getData());
-                                    }
-                                } else {
-                                    Log.w(TAG, "Error getting documents.", task.getException());
-                                }
-                            }
-                        });
-            }
-        });
 
     }
 
@@ -171,13 +134,38 @@ public class MainActivity extends AppCompatActivity {
         // Check which request code is present (if any)
         if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
             mAccessToken = response.getAccessToken();
+            updateSpotifyTokenInFirestore(mAccessToken);
 
         } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
             mAccessCode = response.getCode();
             setTextAsync(mAccessCode, codeTextView);
         }
+
         Button profileBtn = (Button) findViewById(R.id.profile_btn);
         profileBtn.performClick();
+    }
+
+    private void updateSpotifyTokenInFirestore(String token) {
+        EditText editTextDatabase = findViewById(R.id.editTextDatabase);
+        String username = editTextDatabase.getText().toString();
+
+        if (username.isEmpty()) {
+            Toast.makeText(this, "Username is empty, can't store token.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("user", user);
+        user.put("spotifyToken", token);
+
+        // Update Firestore collection reference
+        db.collection("sample")
+                // Update document reference to "sample1"
+                .document("sample1")
+                .set(user)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Spotify token successfully stored!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error storing Spotify token", e));
+
     }
 
     /**
