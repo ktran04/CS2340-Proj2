@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import androidx.annotation.NonNull;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private FirebaseFirestore db;
     private FirebaseAuth auth;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private String mAccessToken, mAccessCode;
@@ -65,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
         FirebaseApp.initializeApp(this);
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
+
+
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         // Initialize the views
         profileTextView = (TextView) findViewById(R.id.response_text_view);
@@ -145,6 +150,11 @@ public class MainActivity extends AppCompatActivity {
         profileBtn.performClick();
     }
 
+    /**
+     * Puts spotify token into firestore database
+     * @param token the token from the user
+     */
+
     private void updateSpotifyTokenInFirestore(String token) {
         EditText editTextDatabase = findViewById(R.id.editTextDatabase);
         String username = editTextDatabase.getText().toString();
@@ -165,6 +175,10 @@ public class MainActivity extends AppCompatActivity {
                 .set(user)
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "Spotify token successfully stored!"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error storing Spotify token", e));
+
+        Bundle params = new Bundle();
+        params.putString("token_status", "success");
+        mFirebaseAnalytics.logEvent("spotify_token_stored", params);
 
     }
 
