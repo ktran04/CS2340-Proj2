@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="editTextDatabase" type="id" />
+    <item name="textViewDatabase" type="id" />
+    <item name="readButton" type="id" />
+    <item name="writeButton" type="id" />
+</resources>

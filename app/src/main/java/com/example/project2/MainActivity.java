@@ -5,11 +5,24 @@ import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.project2.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import androidx.annotation.NonNull;
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
@@ -18,6 +31,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -32,6 +47,10 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int AUTH_TOKEN_REQUEST_CODE = 0;
     public static final int AUTH_CODE_REQUEST_CODE = 1;
+    private static final String TAG = "MainActivity";
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     private final OkHttpClient mOkHttpClient = new OkHttpClient();
     private String mAccessToken, mAccessCode;
@@ -39,19 +58,24 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView tokenTextView, codeTextView, profileTextView;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        FirebaseApp.initializeApp(this);
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
+
+
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
         // Initialize the views
-        tokenTextView = (TextView) findViewById(R.id.token_text_view);
-        codeTextView = (TextView) findViewById(R.id.code_text_view);
         profileTextView = (TextView) findViewById(R.id.response_text_view);
 
         // Initialize the buttons
         Button tokenBtn = (Button) findViewById(R.id.token_btn);
-        Button codeBtn = (Button) findViewById(R.id.code_btn);
         Button profileBtn = (Button) findViewById(R.id.profile_btn);
 
         // Set the click listeners for the buttons
@@ -60,13 +84,23 @@ public class MainActivity extends AppCompatActivity {
             getToken();
         });
 
-        codeBtn.setOnClickListener((v) -> {
-            getCode();
-        });
-
         profileBtn.setOnClickListener((v) -> {
             onGetUserProfileClicked();
         });
+
+        // Initialize the views
+        tokenTextView = (TextView) findViewById(R.id.token_text_view);
+        profileTextView = (TextView) findViewById(R.id.response_text_view);
+
+//        Button writeButton = findViewById(R.id.writeButton);
+//        Button readButton = findViewById(R.id.readButton);
+//        final TextView textViewDatabase = findViewById(R.id.textViewDatabase);
+
+        // Initialize the buttons
+
+
+        // Set the click listeners for the buttons
+
 
     }
 
@@ -105,12 +139,47 @@ public class MainActivity extends AppCompatActivity {
         // Check which request code is present (if any)
         if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
             mAccessToken = response.getAccessToken();
-            setTextAsync(mAccessToken, tokenTextView);
+            // updateSpotifyTokenInFirestore(mAccessToken);
 
         } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
             mAccessCode = response.getCode();
             setTextAsync(mAccessCode, codeTextView);
         }
+
+        Button profileBtn = (Button) findViewById(R.id.profile_btn);
+        profileBtn.performClick();
+    }
+
+    /**
+     * Puts spotify token into firestore database
+     * @param token the token from the user
+     */
+
+    private void updateSpotifyTokenInFirestore(String token) {
+        EditText editTextDatabase = findViewById(R.id.editTextDatabase);
+        String username = editTextDatabase.getText().toString();
+
+        if (username.isEmpty()) {
+            Toast.makeText(this, "Username is empty, can't store token.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("user", user);
+        user.put("spotifyToken", token);
+
+        // Update Firestore collection reference
+        db.collection("sample")
+                // Update document reference to "sample1"
+                .document("sample1")
+                .set(user)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Spotify token successfully stored!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error storing Spotify token", e));
+
+        Bundle params = new Bundle();
+        params.putString("token_status", "success");
+        mFirebaseAnalytics.logEvent("spotify_token_stored", params);
+
     }
 
     /**
