@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import com.example.project2.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -186,6 +188,9 @@ public class MainActivity extends AppCompatActivity {
      * Get user profile
      * This method will get the user profile using the token
      */
+
+
+
     public void onGetUserProfileClicked() {
         if (mAccessToken == null) {
             Toast.makeText(this, "You need to get an access token first!", Toast.LENGTH_SHORT).show();
@@ -212,15 +217,36 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 try {
-                    final JSONObject jsonObject = new JSONObject(response.body().string());
-                    setTextAsync(jsonObject.toString(3), profileTextView);
-                } catch (JSONException e) {
-                    Log.d("JSON", "Failed to parse data: " + e);
-                    Toast.makeText(MainActivity.this, "Failed to parse data, watch Logcat for more details",
+                    final String jsonResponse = response.body().string();
+                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+                    // Parse JSON response into a Java object
+                    UserProfile userProfile = gson.fromJson(jsonResponse, UserProfile.class);
+
+                    // Format the user profile data
+                    String formattedProfile = "User: " + userProfile.display_name + "\n" +
+                            "Followers: " + userProfile.followers.total + "\n" +
+                            "Email: " + userProfile.email;
+
+                    setTextAsync(formattedProfile, profileTextView);
+                } catch (IOException e) {
+                    Log.d("IO", "Failed to read response: " + e);
+                    Toast.makeText(MainActivity.this, "Failed to read response, watch Logcat for more details",
                             Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    // Define a class to represent user profile data
+    class UserProfile {
+        String display_name;
+        Followers followers;
+        String email;
+
+        class Followers {
+            int total;
+        }
     }
 
     /**
